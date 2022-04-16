@@ -3,6 +3,7 @@ Implements a Finite state machine(FSM) executor with durable execution.
 
 ## General idea of FSM and code representation
 - User writes Operations which logically represents a FSM.
+    - Example: [LINK](https://github.com/devanshu0987/FiniteStateMachineExecutor/blob/v1/src/operations/add_2_numbers.rs)
 - FSM structure
   - Each FSM is a Directed acyclic graph. Nodes in this DAG represents FSM states that are possible. When we want to go from one state to another, we execute a transition function.
   - We store some amount of state that remains available between transition function executions.
@@ -60,14 +61,14 @@ Implements a Finite state machine(FSM) executor with durable execution.
     }
     ```
 ## General idea for executor
-- Executor is the orchestrator of executions. It will store all the information necessary to perform execution.
+- Executor is the orchestrator of executions and stores all the information necessary to perform execution.
     ```
     pub struct Executor {
         active_workflows: Vec<ExecutionContext>,
         /// other things here ...
     }
     ```
-- We enqueue future executions into active workflows. This represents what things the executor needs to execute.
+- We enqueue future executions into active workflows.
 - It keeps popping elements out and performs the execution defined in the ExecutionContext.
 - We define `ExecutionContext` as following
     ```
@@ -85,6 +86,9 @@ Implements a Finite state machine(FSM) executor with durable execution.
     }
     ```
 - `ExecutionContext` stores information in serialized format because later, we can persist these contexts in a database and make the executions durable between each transitions. For now, we will use in-memory data structures to house this data.
+- There are 2 types of executions: 
+    - `Initialize` an operation. For example setting `v1` and `v2` in our sum example to 0 and 0 and EMIT `Execute` instruction by setting `next_state_to_execute`.
+    - `Execute` an operation: Finding the transition function associated with `next_state_to_execute` and executing it. Figure out if it was error or success. If success, we return next state to execute. Later EMIT this info as another `Execute` instruction if necessary.
 - Potential flow
   - `serialized_execution_context` is present with `Executor`. We can retrieve it from DB or any other source. It is just serialized string representing what we need to execute.
   -  We pass this to `ExecutionContext::new` to perform validation on the serialized data and generate `ExecutionContext`.
