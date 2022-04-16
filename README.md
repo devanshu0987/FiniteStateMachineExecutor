@@ -104,12 +104,12 @@ Implements a Finite state machine(FSM) executor with durable execution.
 
 
 ## Things to figure out
-- When we perform validation on `serialized_execution_context`, we need access to type information and associated functions wrt that type. How do we do that?
-    - They are code and rust will ask me to make them available at compile time.
-- We need to be able to generate proper type out from `serialized_operation_global_state` and get `AddTwoNumOperationGlobalState` from it. But serde need the type info to which to deserialize it to. For example: `let type: AddTwoNumOperationGlobalState = serde_json::from_str(&serialized_operation_global_state).unwrap();`
+- When performing validation on `serialized_execution_context`, we need access to type information and associated functions wrt that type. How do we do that?
+    - These are struct and enum in code and rust will ask me to make them available at compile time.
+- Generate proper type out from `serialized_operation_global_state` and get `AddTwoNumOperationGlobalState` from it. But serde need the type info to which to deserialize it to. For example: `let type: AddTwoNumOperationGlobalState = serde_json::from_str(&serialized_operation_global_state).unwrap();`
     - But to do this for **all** the operations we will define, the only answer I have is to write a bunch of if statements.
     - But that is not maintainable.
-    - Essentially what I need is some kind of dynamic dispatch which does this matching for me.
+    - What I need is dynamic dispatch which does this matching for me.
 - Maybe Executor exposes some function which says "hey register all these operations for me, this struct is for Global state, this enum is for state and this struct is for args"
-    - Either it is able to do this on its own OR we provide it in some form. Not so maintainable but lets see.
+    - Either it is able to do this on its own OR we provide it in some form. Latter is not so maintainable but lets see.
     - Once that is done, it is able to deserialize things properly at runtime.
